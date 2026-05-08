@@ -1,9 +1,6 @@
-"""Tests for src/mlp/optimizer.py (§5.3)."""
 import numpy as np
 import pytest
 
-
-@pytest.mark.skip(reason="Enable once the full pipeline is implemented")
 def test_loss_decreases_on_simple_problem():
     """
     On the synthetic dataset, gradient descent should reduce the loss over
@@ -21,5 +18,5 @@ def test_loss_decreases_on_simple_problem():
     losses, _ = grad_descent(data, model, iterations=20, learning_rate=1e-3)
 
     assert len(losses) == 21  # initial + 20 updates
-    # Allow some non-monotonicity; just demand overall improvement.
+    # Allow some non-monotonicity- just demand overall improvement
     assert losses[-1] < losses[0]
