@@ -1,30 +1,13 @@
-"""
-Sections 1.4 and 4.2 — Implicit-bias trick + full forward pass.
-
-The forward pass stores each layer's post-activation output in a cache as
-``A{l}`` (with ``A0 = X``), so that `backward.py` can reuse them without
-recomputing.
-"""
-
 from __future__ import annotations
 import numpy as np
 
-
 def modify_x_w(x: np.ndarray, w: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
-    §1.4 — Return (X', W') such that X · W + b == X' · W'.
-
-    Parameters
-    ----------
-    x : (..., d_in) array
-    w : (d_in, d_out) array
-    b : (d_out,) or (1, d_out) array
-    """
-    # TODO §1.4
-    X_new = None
-    W_new = None
-    return X_new, W_new
-
+    x = np.atleast_2d(x)
+    ones_column = np.ones((x.shape[0], 1))
+    x_new = np.hstack([x, ones_column])
+    b_row = np.atleast_2d(b)
+    w_new = np.vstack([w, b_row])
+    return x_new, w_new
 
 def mlp_forward(my_mlp: dict[str, np.ndarray], x: np.ndarray) -> tuple[dict[str, np.ndarray], np.ndarray]:
     """

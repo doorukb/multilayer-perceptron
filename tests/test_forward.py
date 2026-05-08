@@ -1,10 +1,8 @@
-"""Tests for src/mlp/forward.py (§1.4, §4.2)."""
 import numpy as np
 import pytest
 from mlp.forward import modify_x_w, mlp_forward
 
 def test_modify_x_w_vector():
-    """Mirrors the notebook's vector test case."""
     X = np.array([1, 2, 3, 4])
     W = np.ones((4, 2))
     b = np.ones(2)
@@ -12,13 +10,11 @@ def test_modify_x_w_vector():
     np.testing.assert_allclose(X_new @ W_new, X @ W + b)
 
 def test_modify_x_w_matrix():
-    """Mirrors the notebook's matrix test case."""
     X = np.array([[1, 2, 3], [4, 5, 6]])
     W = np.array([[1, 2, 3, 10], [4, 5, 6, 10], [7, 8, 9, 10]])
     b = np.array([[5, 4, 6, 9]])
     X_new, W_new = modify_x_w(X, W, b)
     np.testing.assert_allclose(X_new @ W_new, X @ W + b)
-
 
 @pytest.mark.skip(reason="Enable once §4.2 mlp_forward is implemented")
 def test_mlp_forward_cache_keys():
