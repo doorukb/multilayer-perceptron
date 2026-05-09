@@ -1,23 +1,15 @@
-"""
-Section 6 — Hyperparameter tuning.
-
-Hard rule from the problem statement: the test set must not influence any
-hyperparameter choice. Use a *validation* split carved out of the training
-data for all model selection.
-"""
-
 from __future__ import annotations
 import numpy as np
-
 
 def split_train_validation(
     train_data: np.ndarray, val_fraction: float = 0.2, seed: int | None = None
 ) -> tuple[np.ndarray, np.ndarray]:
-    """
-    §6.2 — Reserve ``val_fraction`` of the *training* data as validation.
-    """
-    # TODO §6.2
-    raise NotImplementedError
+
+    rng = np.random.default_rng(seed)
+    n_total = train_data.shape[0]
+    n_val = int(round(n_total * val_fraction))
+    indices = rng.permutation(n_total)
+    return train_data[indices[n_val:]], train_data[indices[:n_val]]
 
 
 def grad_descent_with_validation(
@@ -27,17 +19,27 @@ def grad_descent_with_validation(
     iterations: int,
     learning_rate: float,
 ) -> tuple[list[float], list[float], dict[str, np.ndarray]]:
-    """
-    §6.2 — Same as `optimizer.grad_descent`, but also evaluates loss on
-    ``val_data`` every iteration WITHOUT updating weights from it.
+    
+    x_tr, y_tr = train_data[:, :2], train_data[:, 2:3]
+    x_va, y_va = val_data[:, :2], val_data[:, 2:3]
 
-    Returns
-    -------
-    train_losses, val_losses, final_model
-    """
-    # TODO §6.2
-    raise NotImplementedError
+    _, p_tr = mlp_forward(my_mlp, x_tr)
+    _, p_va = mlp_forward(my_mlp, x_va)
+    train_losses = [mse_loss(y_tr, p_tr)]
+    val_losses = [mse_loss(y_va, p_va)]
 
+    for _ in range(iterations):
+        cache, p_tr = mlp_forward(my_mlp, x_tr)
+        grads = backprop(my_mlp, cache, y_tr, p_tr)
+        for key in my_mlp:
+            my_mlp[key] -= learning_rate * grads[f"d{key}"]
+
+        _, p_tr = mlp_forward(my_mlp, x_tr)
+        _, p_va = mlp_forward(my_mlp, x_va)
+        train_losses.append(mse_loss(y_tr, p_tr))
+        val_losses.append(mse_loss(y_va, p_va))
+
+    return train_losses, val_losses, my_mlp
 
 def hyperparameter_search(train_data: np.ndarray, search_space: dict) -> dict:
     """
