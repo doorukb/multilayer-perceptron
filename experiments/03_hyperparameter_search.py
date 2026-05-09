@@ -1,12 +1,3 @@
-"""
-§6.3 — Full hyperparameter search.
-
-Strict rule: the test set is touched ONLY ONCE, after the final architecture
-and learning rate have been chosen using train + validation only.
-
-Run from the project root:
-    python experiments/03_hyperparameter_search.py
-"""
 from __future__ import annotations
 import _path_setup  # noqa: F401
 
@@ -17,6 +8,7 @@ from mlp.forward import mlp_forward
 from mlp.loss import mse_loss
 from mlp.tuning import split_train_validation, hyperparameter_search
 
+# The test set must be touched only once, after the final architecture and learning rate have been chosen using train + validation only
 
 ARCHITECTURES = [
     [2, 5, 1],
@@ -26,7 +18,6 @@ ARCHITECTURES = [
 ]
 LEARNING_RATES = [0.01, 0.05, 0.1]
 ITERATIONS = 2000
-
 
 def main() -> None:
     np.random.seed(0)
@@ -48,7 +39,6 @@ def main() -> None:
         iterations=ITERATIONS,
     )
 
-    # Tabulate, sorted by final validation loss.
     header = f"{'arch':<22} {'lr':<6} {'train':<10} {'val':<10} {'best_val':<10}"
     print()
     print(header)
@@ -60,7 +50,6 @@ def main() -> None:
             f"{r['best_val_loss']:<10.4f}"
         )
 
-    # Selection — based on validation loss alone.
     best = min(results, key=lambda r: r["final_val_loss"])
     print()
     print("=" * 60)
@@ -71,7 +60,7 @@ def main() -> None:
     print(f"  val   MSE = {best['final_val_loss']:.4f}")
     print("=" * 60)
 
-    # The single, final test-set evaluation.
+    # the single, final set evaluation
     x_test = test_data[:, :2]
     y_test = test_data[:, 2:3]
     _, pred_test = mlp_forward(best["model"], x_test)
@@ -80,7 +69,6 @@ def main() -> None:
     print()
     print(f"  test  MSE = {test_loss:.4f}    <-- the headline number")
     print()
-
 
 if __name__ == "__main__":
     main()

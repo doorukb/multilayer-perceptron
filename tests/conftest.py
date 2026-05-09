@@ -1,7 +1,3 @@
-"""
-Make `src/` importable as a package root for tests so we can write
-`from mlp import ...` without installing the project.
-"""
 import sys
 from pathlib import Path
 

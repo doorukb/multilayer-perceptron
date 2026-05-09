@@ -1,20 +1,12 @@
-"""
-Plotting helpers (§2, §5, §6).
-
-Kept separate from ``data.py`` and the math modules so the latter have zero
-matplotlib dependency — useful for headless testing.
-"""
-
 from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401  (registers the 3D projection on older mpl)
+from mpl_toolkits.mplot3d import Axes3D  
 
 from mlp.forward import mlp_forward
 
-
 def plot_3d_scatter(points: np.ndarray) -> None:
-    """§2.2 — 3D scatter of points colored by Z."""
+    # 3d scatter of the dataset
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="3d")
     x, y, z = points[:, 0], points[:, 1], points[:, 2]
@@ -25,9 +17,8 @@ def plot_3d_scatter(points: np.ndarray) -> None:
     ax.set_title("Synthetic dataset")
     plt.show()
 
-
 def plot_train_and_test(train_data: np.ndarray, test_data: np.ndarray) -> None:
-    """§2.3 — Train (circles) vs test (triangles) scatter on the same axes."""
+    # train (circles) vs test (triangles) 
     fig = plt.figure(figsize=(8, 6))
     ax = fig.add_subplot(111, projection="3d")
 
@@ -43,19 +34,15 @@ def plot_train_and_test(train_data: np.ndarray, test_data: np.ndarray) -> None:
         edgecolors="black", linewidths=0.5,
     )
 
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-    ax.set_title("Train (circles) vs test (triangles)")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.set_title("train (circles) vs test (triangles)")
     ax.legend()
     plt.show()
 
-
 def plot_data_and_pred(my_mlp, train_points: np.ndarray, test_points: np.ndarray) -> None:
-    """
-    §5.4 — Trained model's prediction surface over [-1, 1]^2 with train/test
-    points overlaid.
-    """
+    # rained model's prediction surface over [-1, 1]^2 
     grid_size = 30
     xs = np.linspace(-1, 1, grid_size)
     ys = np.linspace(-1, 1, grid_size)
@@ -82,26 +69,14 @@ def plot_data_and_pred(my_mlp, train_points: np.ndarray, test_points: np.ndarray
         alpha=1.0, marker="^", label="test",
         edgecolors="black", linewidths=0.5,
     )
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-    ax.set_title("Trained MLP — prediction surface vs. data")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.set_title("trained MLP : prediction surface vs. data")
     ax.legend()
     plt.show()
 
-
 def plot_learning_curves(curves: dict[str, dict]) -> None:
-    """
-    §6 — Plot one or more (train, val) learning-curve pairs on shared axes.
-
-    ``curves`` is a dict like:
-        {
-            "1 layer":  {"train": [...], "val": [...]},
-            "2 layers": {"train": [...], "val": [...]},
-        }
-
-    Each entry gets its own color; train is solid, val is dashed.
-    """
     plt.figure(figsize=(9, 5))
     for i, (label, pair) in enumerate(curves.items()):
         color = f"C{i}"

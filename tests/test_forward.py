@@ -3,8 +3,6 @@ import pytest
 from mlp.forward import modify_x_w, mlp_forward
 
 def test_modify_x_w_vector():
-    """Notebook's vector test case. modify_x_w returns 2D output, so we compare
-    against the un-augmented expression after squeezing."""
     X = np.array([1, 2, 3, 4])
     W = np.ones((4, 2))
     b = np.ones(2)

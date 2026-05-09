@@ -1,11 +1,3 @@
-"""
-§6 — Hyperparameter tuning utilities.
-
-Hard rule (per the problem statement): the test set must not influence any
-hyperparameter choice. Use a *validation* split carved out of the training
-data for all model selection.
-"""
-
 from __future__ import annotations
 import numpy as np
 
@@ -14,22 +6,12 @@ from mlp.forward import mlp_forward
 from mlp.backward import backprop
 from mlp.loss import mse_loss
 
-
-def split_train_validation(
-    train_data: np.ndarray, val_fraction: float = 0.2, seed: int | None = None
-) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Carve a validation subset out of the training data.
-
-    Uses an independent RNG (``np.random.default_rng``) so the split is
-    reproducible without affecting the global numpy random state.
-    """
+def split_train_validation(train_data: np.ndarray, val_fraction: float = 0.2, seed: int | None = None) -> tuple[np.ndarray, np.ndarray]:
     rng = np.random.default_rng(seed)
     n_total = train_data.shape[0]
     n_val = int(round(n_total * val_fraction))
     indices = rng.permutation(n_total)
     return train_data[indices[n_val:]], train_data[indices[:n_val]]
-
 
 def grad_descent_with_validation(
     train_data: np.ndarray,
@@ -38,13 +20,6 @@ def grad_descent_with_validation(
     iterations: int,
     learning_rate: float,
 ) -> tuple[list[float], list[float], dict[str, np.ndarray]]:
-    """
-    Train on ``train_data`` while monitoring (read-only) loss on ``val_data``.
-
-    Returns ``(train_losses, val_losses, model)``. Both loss lists have length
-    ``iterations + 1`` (initial loss + one per step). Validation never
-    contributes to gradients.
-    """
     x_tr, y_tr = train_data[:, :2], train_data[:, 2:3]
     x_va, y_va = val_data[:, :2], val_data[:, 2:3]
 
@@ -66,7 +41,6 @@ def grad_descent_with_validation(
 
     return train_losses, val_losses, my_mlp
 
-
 def hyperparameter_search(
     train_subset: np.ndarray,
     val_subset: np.ndarray,
@@ -75,21 +49,6 @@ def hyperparameter_search(
     iterations: int = 2000,
     init_seed: int = 42,
 ) -> list[dict]:
-    """
-    §6.3 — Grid search over (architecture, learning_rate).
-
-    Trains each configuration on ``train_subset`` and evaluates on
-    ``val_subset``. NEVER touches the test set. The caller is responsible
-    for selecting a single configuration based on ``final_val_loss``
-    and only then evaluating that single chosen model on test data.
-
-    Returns
-    -------
-    results : list of dicts, one per configuration. Each dict contains:
-        'arch', 'lr', 'final_train_loss', 'final_val_loss',
-        'best_val_loss', 'best_val_iter', 'model',
-        'train_curve', 'val_curve'.
-    """
     results = []
     for arch in architectures:
         for lr in learning_rates:
@@ -114,5 +73,4 @@ def hyperparameter_search(
                 "train_curve": train_losses,
                 "val_curve": val_losses,
             })
-
     return results

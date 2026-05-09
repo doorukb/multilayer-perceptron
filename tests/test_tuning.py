@@ -1,7 +1,5 @@
-"""Tests for src/mlp/tuning.py (§6)."""
 import numpy as np
 import pytest
-
 
 def test_split_train_validation_shapes_and_no_overlap():
     from mlp.tuning import split_train_validation
@@ -54,7 +52,6 @@ def test_grad_descent_with_validation_loss_lengths():
 
 
 def test_hyperparameter_search_smoke():
-    """Tiny search to make sure the function runs and returns the expected shape."""
     from mlp.data import sample_points
     from mlp.tuning import split_train_validation, hyperparameter_search
 

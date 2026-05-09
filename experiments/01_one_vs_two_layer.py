@@ -1,13 +1,3 @@
-"""
-§6.1 — One-layer vs two-layer network on the synthetic dataset.
-
-Trains a [2, 5, 1] and a [2, 5, 5, 1] MLP with the same learning rate and
-iteration count, then plots both training curves on shared axes and prints
-the final losses.
-
-Run from the project root:
-    python experiments/01_one_vs_two_layer.py
-"""
 from __future__ import annotations
 import _path_setup  # noqa: F401
 
@@ -18,12 +8,12 @@ from mlp.data import create_train_and_test
 from mlp.init import init_mlp
 from mlp.optimizer import grad_descent
 
+# Trains a [2, 5, 1] and a [2, 5, 5, 1] MLP with the same learning rate and iteration count, then plots both training curves on shared axes and prints the final losses.
 
 ARCH_1 = [2, 5, 1]
 ARCH_2 = [2, 5, 5, 1]
 ITERATIONS = 2000
 LEARNING_RATE = 0.05
-
 
 def main() -> None:
     np.random.seed(0)
@@ -37,8 +27,8 @@ def main() -> None:
     model_2 = init_mlp(ARCH_2)
     losses_2, model_2 = grad_descent(train_data, model_2, ITERATIONS, LEARNING_RATE)
 
-    print(f"1-layer  {ARCH_1}     final train MSE: {losses_1[-1]:.4f}")
-    print(f"2-layer  {ARCH_2}  final train MSE: {losses_2[-1]:.4f}")
+    print(f"1-layer {ARCH_1} final train MSE: {losses_1[-1]:.4f}")
+    print(f"2-layer {ARCH_2} final train MSE: {losses_2[-1]:.4f}")
 
     plt.figure(figsize=(8, 5))
     plt.plot(losses_1, label=f"1 hidden layer {ARCH_1}", color="C0")
@@ -49,7 +39,6 @@ def main() -> None:
     plt.legend()
     plt.grid(True)
     plt.show()
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,3 @@
-"""Tests for src/mlp/activations.py (§4.1, §1.1)."""
 import numpy as np
 import pytest
 from mlp.activations import sigmoid_forward, sigmoid_backward

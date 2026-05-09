@@ -2,10 +2,7 @@ import numpy as np
 import pytest
 
 def test_loss_decreases_on_simple_problem():
-    """
-    On the synthetic dataset, gradient descent should reduce the loss over
-    the first handful of iterations. This catches sign errors in backprop.
-    """
+    # On the synthetic dataset, gradient descent should reduce the loss over the first handful of iterations. This catches sign errors in backprop
     from mlp.data import sample_points
     from mlp.init import init_mlp
     from mlp.optimizer import grad_descent
@@ -18,5 +15,4 @@ def test_loss_decreases_on_simple_problem():
     losses, _ = grad_descent(data, model, iterations=20, learning_rate=1e-3)
 
     assert len(losses) == 21  # initial + 20 updates
-    # Allow some non-monotonicity- just demand overall improvement
     assert losses[-1] < losses[0]

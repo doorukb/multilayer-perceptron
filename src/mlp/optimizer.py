@@ -1,5 +1,3 @@
-"""§5.3 — Vanilla full-batch gradient descent training loop."""
-
 from __future__ import annotations
 import numpy as np
 
@@ -8,32 +6,10 @@ from mlp.backward import backprop
 from mlp.loss import mse_loss
 
 
-def grad_descent(
-    data: np.ndarray,
-    my_mlp: dict[str, np.ndarray],
-    iterations: int,
-    learning_rate: float,
-) -> tuple[list[float], dict[str, np.ndarray]]:
-    """
-    Full-batch gradient descent on the synthetic (X, Y, Z) dataset.
+def grad_descent(data: np.ndarray, my_mlp: dict[str, np.ndarray], iterations: int, learning_rate: float,) -> tuple[list[float], dict[str, np.ndarray]]:
+    # Each iteration makes a forward pass, computes MSE loss, backpropagates, and then updates each weight matrices : W_layer -= learning_rate * dW_layer
 
-    Each iteration:
-        1. forward pass
-        2. compute MSE loss (recorded after the update)
-        3. backprop
-        4. update each W_l ← W_l - lr * dW_l
-
-    The returned list also contains the loss BEFORE any updates, so its
-    length is iterations + 1.
-
-    Parameters
-    ----------
-    data : ndarray of shape (N, 3) — columns (X, Y, Z)
-    my_mlp : dict from init_mlp; mutated in place
-    iterations : number of update steps
-    learning_rate : step size η
-    """
-    # Split into features (X, Y) and targets (Z); keep Z 2D for safe broadcasting.
+    # Split into features (X, Y) and targets (Z); keep Z 2D for safe broadcasting
     inputs = data[:, :2]
     targets = data[:, 2:3]
 
