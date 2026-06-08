@@ -98,6 +98,19 @@ def test_minibatch_converges_over_epochs():
     assert len(losses) == epochs + 1
     assert losses[-1] < losses[0]
 
+# test that the gradient descent with the relu activation function reduces the loss
+def test_grad_descent_relu_activation_reduces_loss():
+    from mlp.activations import relu_backward, relu_forward
+    from mlp.data import sample_points
+    from mlp.init import init_mlp
+    from mlp.optimizer import grad_descent
+
+    np.random.seed(0)
+    data = sample_points(100)
+    model = init_mlp([2, 5, 1])
+    losses, _ = grad_descent(data, model, epochs=20, learning_rate=1e-3, activation=relu_forward, activation_backward=relu_backward)
+    assert losses[-1] < losses[0]
+
 # test that the SGD batch size one
 def test_sgd_batch_size_one():
     from mlp.data import sample_points

@@ -1,9 +1,17 @@
 from __future__ import annotations
+from collections.abc import Callable
 import numpy as np
+from mlp.activations import sigmoid_backward
 from mlp.loss import mse_loss_grad
 
 # compute the gradients of the loss function with respect to the weights of the network
-def backprop(my_mlp: dict[str, np.ndarray], cache: dict[str, np.ndarray], label: np.ndarray, pred: np.ndarray) -> dict[str, np.ndarray]:
+def backprop(
+    my_mlp: dict[str, np.ndarray], # the model weights
+    cache: dict[str, np.ndarray], # the cache of the forward pass
+    label: np.ndarray, # the target labels
+    pred: np.ndarray, # the predicted labels
+    activation_backward: Callable[[np.ndarray], np.ndarray] = sigmoid_backward, # the backward pass of the activation function
+) -> dict[str, np.ndarray]:
     total_layers = len(my_mlp)
     dcache: dict[str, np.ndarray] = {}
     # get the backward pass with dL/d(pred) from the loss function
@@ -20,6 +28,7 @@ def backprop(my_mlp: dict[str, np.ndarray], cache: dict[str, np.ndarray], label:
             W = my_mlp[f"W{layer}"]
             # strip the bias row before propagating delta to the previous layer. The bias has no upstream connection, so its row does not participate in the gradient flowing backward.
             W_without_bias = W[:-1, :]
-            sigmoid_gradient = A * (1 - A)
-            delta = (delta @ W_without_bias.T) * sigmoid_gradient
+            Z = cache[f"Z{layer}"]
+            act_grad = activation_backward(Z)
+            delta = (delta @ W_without_bias.T) * act_grad
     return dcache

@@ -5,7 +5,7 @@
 - Matplotlib
 - pytest
 
-A multilayer perceptron trained with gradient descent, implemented entirely in NumPy with no machine learning frameworks. The project covers forward pass, backpropagation, MSE loss, and a gradient descent optimizer, all written from scratch. Analytical gradients are validated against numerical finite-difference checks. A hyperparameter search is included that follows strict train/validation/test discipline. The codebase is structured as a modular Python package with a full pytest suite.
+A multilayer perceptron trained with gradient descent, implemented entirely in NumPy with no machine learning frameworks. The project covers forward pass, backpropagation, MSE loss, and a gradient descent optimizer, all written from scratch. Hidden activations (sigmoid, tanh, ReLU) are swappable via the strategy pattern, each with gradient-checked backward passes. Analytical gradients are validated against numerical finite-difference checks. A hyperparameter search is included that follows strict train/validation/test discipline. The codebase is structured as a modular Python package with a full pytest suite.
 
 
 THE PROBLEM
@@ -26,6 +26,19 @@ Both models converge to roughly the same final training loss near the irreducibl
 
 <img width="424" height="300" alt="heat_map" src="https://github.com/user-attachments/assets/27131084-2c87-4adb-b7af-4d1693b251ae" /> <img width="361" height="300" alt="trained_predictions_vs_true_data" src="https://github.com/user-attachments/assets/4d8058c8-ff55-4c93-8266-8e1fe3858f1a" />
 
+
+Activation comparison (experiment 04, 2000 epochs, lr=0.05, architecture [2, 10, 10, 10, 1]):
+
+This is the payoff experiment for the activations phase. All three networks share identical Xavier initialization, learning rate, and data; only the hidden activation changes.
+
+    activation    initial MSE    final MSE
+    sigmoid          2.2047        0.4041
+    tanh             1.9108        0.1898
+    ReLU             1.8162        0.1697
+
+At initialization the mean sigmoid derivative sigma'(z) = sigma(1-sigma) is already below 0.25 on every hidden layer (~0.23-0.24). Backprop multiplies by this factor at each layer, so gradient signal shrinks exponentially with depth. ReLU keeps a unit derivative on active units and reaches the noise floor (~0.25 MSE). tanh is symmetric around zero and lands between the two. sigmoid converges, but much more slowly and to a higher plateau — the curve looks nearly flat for long stretches while ReLU descends steadily.
+
+Run locally: `cd experiments && python 04_activation_comparison.py`
 
 
 Hyperparameter search (experiment 03, 4 architectures x 3 learning rates, 2000 iterations):
@@ -99,6 +112,10 @@ INSTALLATION
         train_sub, val_sub, model, epochs=2000, learning_rate=0.1
     )
 
+- Comparing activations on a deep network (sigmoid vs tanh vs ReLU):
+    cd experiments
+    python 04_activation_comparison.py
+
 - Running the hyperparameter search:
     cd experiments
     python 03_hyperparameter_search.py
@@ -115,16 +132,16 @@ After any change to init, forward, or backward, re-run the gradient-check tests:
 The numerical gradient check is a regression test, not a one-time validation.
 
 test_activations
-    Checks sigmoid_forward at x=0 (must return 0.5), at large positive/negative inputs, and verifies sigmoid_backward matches the numerical finite-difference derivative to within 1e-5.
+    Checks sigmoid_forward at x=0 (must return 0.5), at large positive/negative inputs, and verifies sigmoid_backward matches the numerical finite-difference derivative to within 1e-5. tanh_forward is checked at x=0 (must return 0.0) and at saturation; tanh_backward is verified the same way. relu_forward zeros negatives; relu_backward uses grad=1 if x>0 else 0 at the x=0 kink; finite-difference check excludes x=0.
 
 test_backward
-    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
+    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). Run for sigmoid, tanh, and ReLU hidden activations. For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
 
 test_loss
     MSE loss returns 0 when prediction equals label, returns the correct value on a known example (2/3 for unit-step errors), and the gradient matches the finite-difference gradient to within 1e-5.
 
 test_forward
-    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally; a single-layer test checks the affine result, and a multi-layer test checks cache key structure (A0 through AL) and output shape.
+    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally and accepts a swappable hidden activation (default sigmoid); the output layer stays linear for regression. ReLU and sigmoid produce different hidden activations on the same weights and inputs.
 
 test_init
     init_weight_matrix uses Xavier scaling (std = sqrt(1 / fan_in), zero-mean weights, zero bias row). init_mlp produces weight matrices whose shapes are consistent with the requested layer sizes (including the +1 bias row). Untrained hidden activations stay away from sigmoid saturation.
@@ -133,7 +150,7 @@ test_data
     sample_points returns shape (n, 3), the residual Z - (X^2 - Y^2 + 1.2) has mean near 0 and std near 0.5 on a large sample, and create_train_and_test returns arrays of the requested sizes.
 
 test_optimizer
-    grad_descent trains for epochs with shuffled mini-batches. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Mini-batch convergence is checked as final full-dataset loss below initialization (not monotonic decrease every epoch — batch updates are noisy). Loss must decrease over 20 epochs at lr=1e-3 for full-batch.
+    grad_descent trains for epochs with shuffled mini-batches and accepts swappable activation pairs. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Mini-batch convergence is checked as final full-dataset loss below initialization (not monotonic decrease every epoch — batch updates are noisy). ReLU training via grad_descent reduces loss.
 
 test_tuning
     split_train_validation produces the correct shapes and no row appears in both splits. The split is reproducible when the same seed is used. grad_descent_with_validation returns loss lists of length epochs+1 with all finite values. hyperparameter_search returns one result dict per configuration with the expected keys and correct curve lengths.
@@ -141,7 +158,6 @@ test_tuning
 
 Roadmap
 
-- Additional activations (ReLU, tanh)
 - L2 regularisation
 - Momentum / Adam optimiser
 - Classification variant with cross-entropy loss and softmax output
