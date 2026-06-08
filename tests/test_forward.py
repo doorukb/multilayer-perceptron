@@ -35,3 +35,38 @@ def test_mlp_forward_cache_keys():
     expected_keys = {f"A{i}" for i in range(n_layers + 1)}
     assert expected_keys.issubset(cache.keys())
     assert output.shape[0] == 10
+
+# test that the mlp_forward function can use a different activation function for the hidden layers
+def test_mlp_forward_swappable_activation():
+    from mlp.activations import relu_forward, tanh_forward
+    from mlp.init import init_mlp
+
+    np.random.seed(0)
+    x = np.random.randn(8, 2)
+    model_sigmoid = init_mlp([2, 6, 1])
+    _, out_sigmoid = mlp_forward(model_sigmoid, x)
+    np.random.seed(0)
+    model_relu = init_mlp([2, 6, 1])
+    cache_relu, out_relu = mlp_forward(model_relu, x, activation=relu_forward)
+    np.random.seed(0)
+    model_tanh = init_mlp([2, 6, 1])
+    cache_tanh, out_tanh = mlp_forward(model_tanh, x, activation=tanh_forward)
+
+    assert np.all(cache_relu["A1"] >= 0)
+    assert np.all(cache_tanh["A1"] <= 1) and np.all(cache_tanh["A1"] >= -1)
+    assert not np.allclose(out_sigmoid, out_relu)
+    assert not np.allclose(out_sigmoid, out_tanh)
+
+# test that the output layer stays linear for scalar regression
+def test_mlp_forward_output_layer_stays_linear():
+    from mlp.activations import relu_forward
+    from mlp.init import init_mlp
+
+    np.random.seed(1)
+    model = init_mlp([2, 4, 1])
+    x = np.random.randn(5, 2)
+    cache, out = mlp_forward(model, x, activation=relu_forward)
+
+    np.testing.assert_allclose(out, cache["A2"])
+    assert np.all(cache["A1"] >= 0)
+    assert not np.allclose(out, relu_forward(out))

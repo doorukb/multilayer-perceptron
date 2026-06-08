@@ -124,7 +124,7 @@ test_loss
     MSE loss returns 0 when prediction equals label, returns the correct value on a known example (2/3 for unit-step errors), and the gradient matches the finite-difference gradient to within 1e-5.
 
 test_forward
-    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally; a single-layer test checks the affine result, and a multi-layer test checks cache key structure (A0 through AL) and output shape.
+    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally and accepts a swappable hidden activation (default sigmoid); the output layer stays linear for regression. Tests cover cache keys, relu/tanh hidden layers, and linear output head.
 
 test_init
     init_weight_matrix uses Xavier scaling (std = sqrt(1 / fan_in), zero-mean weights, zero bias row). init_mlp produces weight matrices whose shapes are consistent with the requested layer sizes (including the +1 bias row). Untrained hidden activations stay away from sigmoid saturation.
