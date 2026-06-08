@@ -36,6 +36,25 @@ def test_mlp_forward_cache_keys():
     assert expected_keys.issubset(cache.keys())
     assert output.shape[0] == 10
 
+# test that the hidden activations differ for the sigmoid and relu activation functions
+def test_relu_hidden_differs_from_sigmoid_hidden():
+    from mlp.activations import relu_forward
+    from mlp.init import init_mlp
+
+    np.random.seed(0)
+    x = np.random.randn(8, 2)
+    np.random.seed(42)
+    model = init_mlp([2, 6, 1])
+
+    cache_sigmoid, _ = mlp_forward(model, x)
+    np.random.seed(42)
+    model_relu = init_mlp([2, 6, 1])
+    cache_relu, _ = mlp_forward(model_relu, x, activation=relu_forward)
+
+    assert not np.allclose(cache_sigmoid["A1"], cache_relu["A1"])
+    assert np.all(cache_relu["A1"] >= 0)
+    assert np.any(cache_sigmoid["A1"] != cache_relu["A1"])
+
 # test that the mlp_forward function can use a different activation function for the hidden layers
 def test_mlp_forward_swappable_activation():
     from mlp.activations import relu_forward, tanh_forward

@@ -118,13 +118,13 @@ test_activations
     Checks sigmoid_forward at x=0 (must return 0.5), at large positive/negative inputs, and verifies sigmoid_backward matches the numerical finite-difference derivative to within 1e-5. tanh_forward is checked at x=0 (must return 0.0) and at saturation; tanh_backward is verified the same way. relu_forward zeros negatives; relu_backward uses grad=1 if x>0 else 0 at the x=0 kink; finite-difference check excludes x=0.
 
 test_backward
-    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
+    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). Run for sigmoid and ReLU hidden activations. For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
 
 test_loss
     MSE loss returns 0 when prediction equals label, returns the correct value on a known example (2/3 for unit-step errors), and the gradient matches the finite-difference gradient to within 1e-5.
 
 test_forward
-    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally and accepts a swappable hidden activation (default sigmoid); the output layer stays linear for regression. Tests cover cache keys, relu/tanh hidden layers, and linear output head.
+    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally and accepts a swappable hidden activation (default sigmoid); the output layer stays linear for regression. ReLU and sigmoid produce different hidden activations on the same weights and inputs.
 
 test_init
     init_weight_matrix uses Xavier scaling (std = sqrt(1 / fan_in), zero-mean weights, zero bias row). init_mlp produces weight matrices whose shapes are consistent with the requested layer sizes (including the +1 bias row). Untrained hidden activations stay away from sigmoid saturation.

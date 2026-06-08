@@ -23,7 +23,11 @@ def mlp_forward(my_mlp: dict[str, np.ndarray], x: np.ndarray, activation: Callab
         W = my_mlp[f"W{l}"]
         A, W = modify_x_w(A, W[:-1, :], W[-1:, :])
         Z = A @ W
-        A = activation(Z) if l < n_layers - 1 else Z
+        if l < n_layers - 1:
+            cache[f"Z{l + 1}"] = Z
+            A = activation(Z)
+        else:
+            A = Z
         cache[f"A{l + 1}"] = A
 
     return cache, A
