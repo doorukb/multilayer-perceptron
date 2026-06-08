@@ -64,7 +64,6 @@ INSTALLATION
 - Dependencies (requirements.txt):
     numpy>=1.24
     matplotlib>=3.7
-    jupyter>=1.0
     pytest>=7.4
 
 - Training a model from scratch:
@@ -99,9 +98,6 @@ INSTALLATION
     cd experiments
     python 03_hyperparameter_search.py
 
-- Running the Jupyter notebook:
-    jupyter notebook notebooks/
-
 
 TESTING
 
@@ -109,20 +105,24 @@ To run all the test from the project root, run :
     pytest tests/ -v
 Feel free to add more tests you'd like.
 
+After any change to init, forward, or backward, re-run the gradient-check tests:
+    pytest tests/test_backward.py tests/test_loss.py tests/test_activations.py -v
+The numerical gradient check is a regression test, not a one-time validation.
+
 test_activations
     Checks sigmoid_forward at x=0 (must return 0.5), at large positive/negative inputs, and verifies sigmoid_backward matches the numerical finite-difference derivative to within 1e-5.
 
 test_backward
-    Verifies backprop against a numerical gradient check. For each weight matrix in a [2, 4, 1] network, 5 randomly chosen entries are perturbed by epsilon=1e-5 in both directions and the central-difference estimate is compared to the analytical gradient. Tolerance is 1e-4.
+    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
 
 test_loss
     MSE loss returns 0 when prediction equals label, returns the correct value on a known example (2/3 for unit-step errors), and the gradient matches the finite-difference gradient to within 1e-5.
 
 test_forward
-    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward is checked for correct cache key structure (A0 through AL) and correct output shape.
+    modify_x_w is checked on a vector and a matrix input to confirm that appending a bias column and stacking b as an extra row produces the same result as X @ W + b. mlp_forward uses modify_x_w internally; a single-layer test checks the affine result, and a multi-layer test checks cache key structure (A0 through AL) and output shape.
 
 test_init
-    init_weight_matrix produces the right shape with mean near 1.0 and std near 0.25. init_mlp produces weight matrices whose shapes are consistent with the requested layer sizes (including the +1 bias row).
+    init_weight_matrix uses Xavier scaling (std = sqrt(1 / fan_in), zero-mean weights, zero bias row). init_mlp produces weight matrices whose shapes are consistent with the requested layer sizes (including the +1 bias row). Untrained hidden activations stay away from sigmoid saturation.
 
 test_data
     sample_points returns shape (n, 3), the residual Z - (X^2 - Y^2 + 1.2) has mean near 0 and std near 0.5 on a large sample, and create_train_and_test returns arrays of the requested sizes.
@@ -141,5 +141,5 @@ Roadmap
 - L2 regularisation
 - Momentum / Adam optimiser
 - Classification variant with cross-entropy loss and softmax output
-- Extend the notebook with interactive widgets for visualising the training surface
+- Interactive visualisation widgets for exploring the training surface
 

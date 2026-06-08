@@ -16,6 +16,15 @@ def test_modify_x_w_matrix():
     X_new, W_new = modify_x_w(X, W, b)
     np.testing.assert_allclose(X_new @ W_new, X @ W + b)
 
+def test_mlp_forward_single_layer_affine():
+    rng = np.random.default_rng(0)
+    x = rng.normal(size=(5, 3))
+    w = rng.normal(size=(3, 2))
+    b = rng.normal(size=(1, 2))
+    model = {"W0": np.vstack([w, b])}
+    _, out = mlp_forward(model, x)
+    np.testing.assert_allclose(out, x @ w + b)
+
 def test_mlp_forward_cache_keys():
     from mlp.init import init_mlp
     model = init_mlp([2, 5, 1])

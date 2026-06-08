@@ -18,8 +18,8 @@ def mlp_forward(my_mlp: dict[str, np.ndarray], x: np.ndarray) -> tuple[dict[str,
 
     for l in range(n_layers):
         W = my_mlp[f"W{l}"]
-        A_aug = np.hstack([A, np.ones((A.shape[0], 1))])
-        Z = A_aug @ W
+        A, W = modify_x_w(A, W[:-1, :], W[-1:, :])
+        Z = A @ W
         A = sigmoid_forward(Z) if l < n_layers - 1 else Z
         cache[f"A{l + 1}"] = A
 
