@@ -17,22 +17,34 @@ def grad_descent_with_validation(
     train_data: np.ndarray,
     val_data: np.ndarray,
     my_mlp: dict[str, np.ndarray],
-    iterations: int,
+    epochs: int,
     learning_rate: float,
+    batch_size: int | None = None,
+    seed: int | None = None,
 ) -> tuple[list[float], list[float], dict[str, np.ndarray]]:
     x_tr, y_tr = train_data[:, :2], train_data[:, 2:3]
     x_va, y_va = val_data[:, :2], val_data[:, 2:3]
+    n = train_data.shape[0]
+    if batch_size is None:
+        batch_size = n
+
+    rng = np.random.default_rng(seed)
 
     _, p_tr = mlp_forward(my_mlp, x_tr)
     _, p_va = mlp_forward(my_mlp, x_va)
     train_losses = [mse_loss(y_tr, p_tr)]
     val_losses = [mse_loss(y_va, p_va)]
 
-    for _ in range(iterations):
-        cache, p_tr = mlp_forward(my_mlp, x_tr)
-        grads = backprop(my_mlp, cache, y_tr, p_tr)
-        for key in my_mlp:
-            my_mlp[key] -= learning_rate * grads[f"d{key}"]
+    for _ in range(epochs):
+        perm = rng.permutation(n)
+        for start in range(0, n, batch_size):
+            idx = perm[start : start + batch_size]
+            x_batch = x_tr[idx]
+            y_batch = y_tr[idx]
+            cache, pred = mlp_forward(my_mlp, x_batch)
+            grads = backprop(my_mlp, cache, y_batch, pred)
+            for key in my_mlp:
+                my_mlp[key] -= learning_rate * grads[f"d{key}"]
 
         _, p_tr = mlp_forward(my_mlp, x_tr)
         _, p_va = mlp_forward(my_mlp, x_va)
@@ -46,7 +58,7 @@ def hyperparameter_search(
     val_subset: np.ndarray,
     architectures: list[list[int]],
     learning_rates: list[float],
-    iterations: int = 2000,
+    epochs: int = 2000,
     init_seed: int = 42,
 ) -> list[dict]:
     results = []
@@ -59,7 +71,7 @@ def hyperparameter_search(
 
             train_losses, val_losses, model = grad_descent_with_validation(
                 train_subset, val_subset, model,
-                iterations=iterations, learning_rate=lr,
+                epochs=epochs, learning_rate=lr,
             )
 
             results.append({

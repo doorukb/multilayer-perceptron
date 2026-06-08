@@ -1,4 +1,9 @@
-Gradient Descent MLP
+# Gradient Descent MLP
+
+- Python 3.10+
+- NumPy
+- Matplotlib
+- pytest
 
 A multilayer perceptron trained with gradient descent, implemented entirely in NumPy with no machine learning frameworks. The project covers forward pass, backpropagation, MSE loss, and a gradient descent optimizer, all written from scratch. Analytical gradients are validated against numerical finite-difference checks. A hyperparameter search is included that follows strict train/validation/test discipline. The codebase is structured as a modular Python package with a full pytest suite.
 
@@ -78,7 +83,7 @@ INSTALLATION
     train_data, test_data = create_train_and_test(train_size=100, test_size=20)
 
     model = init_mlp([2, 10, 1])   # input dim=2, 10 hidden units, output dim=1
-    losses, model = grad_descent(train_data, model, iterations=2000, learning_rate=0.1)
+    losses, model = grad_descent(train_data, model, epochs=2000, learning_rate=0.1)
 
     x_test = test_data[:, :2]
     y_test = test_data[:, 2:3]
@@ -91,7 +96,7 @@ INSTALLATION
 
     train_sub, val_sub = split_train_validation(train_data, val_fraction=0.2, seed=0)
     train_losses, val_losses, model = grad_descent_with_validation(
-        train_sub, val_sub, model, iterations=2000, learning_rate=0.1
+        train_sub, val_sub, model, epochs=2000, learning_rate=0.1
     )
 
 - Running the hyperparameter search:
@@ -128,15 +133,14 @@ test_data
     sample_points returns shape (n, 3), the residual Z - (X^2 - Y^2 + 1.2) has mean near 0 and std near 0.5 on a large sample, and create_train_and_test returns arrays of the requested sizes.
 
 test_optimizer
-    Running 20 steps of grad_descent on the synthetic dataset with learning rate 1e-3 must reduce the loss. This catches sign errors in backprop.
+    grad_descent trains for epochs with shuffled mini-batches (batch_size defaults to full-batch GD; batch_size=1 gives SGD). Same shuffle seed yields identical loss curves; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Loss must decrease over 20 epochs at lr=1e-3.
 
 test_tuning
-    split_train_validation produces the correct shapes and no row appears in both splits. The split is reproducible when the same seed is used. grad_descent_with_validation returns loss lists of length iterations+1 with all finite values. hyperparameter_search returns one result dict per configuration with the expected keys and correct curve lengths.
+    split_train_validation produces the correct shapes and no row appears in both splits. The split is reproducible when the same seed is used. grad_descent_with_validation returns loss lists of length epochs+1 with all finite values. hyperparameter_search returns one result dict per configuration with the expected keys and correct curve lengths.
 
 
 Roadmap
 
-- Mini-batch gradient descent in addition to full-batch
 - Additional activations (ReLU, tanh)
 - L2 regularisation
 - Momentum / Adam optimiser
