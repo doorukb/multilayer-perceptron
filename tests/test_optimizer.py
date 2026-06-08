@@ -77,6 +77,27 @@ def test_full_batch_shuffle_is_invariant():
     losses_b, _ = _train_copy(data, [2, 5, 1], epochs=10, learning_rate=1e-3, batch_size=n, seed=99)
     np.testing.assert_allclose(losses_a, losses_b)
 
+# mini-batch gradient estimates are noisy- each update uses a subset of the
+# data, so weights can move in directions that temporarily raise the
+# full-dataset loss. 
+
+# Requiring monotonic decrease every epoch would be the wrong assertion- it confuses per-batch noise with failure to learn
+
+# The correct convergence check for stochastic training is actually weaker
+
+# after N epochs, full-dataset training loss should be lower than at initialization epochs, not monotonic decrease every epoch
+
+# We log that full-dataset MSE at each epoch boundary, not per-batch loss.
+def test_minibatch_converges_over_epochs():
+    from mlp.data import sample_points
+
+    np.random.seed(0)
+    data = sample_points(100)
+    epochs = 40
+    losses, _ = _train_copy(data, [2, 5, 1], epochs=epochs, learning_rate=1e-2, batch_size=8, seed=0)
+    assert len(losses) == epochs + 1
+    assert losses[-1] < losses[0]
+
 # test that the SGD batch size one
 def test_sgd_batch_size_one():
     from mlp.data import sample_points

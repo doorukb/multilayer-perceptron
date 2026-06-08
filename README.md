@@ -133,7 +133,7 @@ test_data
     sample_points returns shape (n, 3), the residual Z - (X^2 - Y^2 + 1.2) has mean near 0 and std near 0.5 on a large sample, and create_train_and_test returns arrays of the requested sizes.
 
 test_optimizer
-    grad_descent trains for epochs with shuffled mini-batches. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Loss must decrease over 20 epochs at lr=1e-3.
+    grad_descent trains for epochs with shuffled mini-batches. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Mini-batch convergence is checked as final full-dataset loss below initialization (not monotonic decrease every epoch — batch updates are noisy). Loss must decrease over 20 epochs at lr=1e-3 for full-batch.
 
 test_tuning
     split_train_validation produces the correct shapes and no row appears in both splits. The split is reproducible when the same seed is used. grad_descent_with_validation returns loss lists of length epochs+1 with all finite values. hyperparameter_search returns one result dict per configuration with the expected keys and correct curve lengths.
