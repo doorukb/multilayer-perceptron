@@ -1,10 +1,12 @@
 from __future__ import annotations
+
 import numpy as np
 
-from mlp.init import init_mlp
 from mlp.forward import mlp_forward
-from mlp.backward import backprop
+from mlp.init import init_mlp
 from mlp.loss import mse_loss
+from mlp.optimizer import _resolve_batch_size, _run_epoch_batches
+
 
 def split_train_validation(train_data: np.ndarray, val_fraction: float = 0.2, seed: int | None = None) -> tuple[np.ndarray, np.ndarray]:
     rng = np.random.default_rng(seed)
@@ -12,6 +14,7 @@ def split_train_validation(train_data: np.ndarray, val_fraction: float = 0.2, se
     n_val = int(round(n_total * val_fraction))
     indices = rng.permutation(n_total)
     return train_data[indices[n_val:]], train_data[indices[:n_val]]
+
 
 def grad_descent_with_validation(
     train_data: np.ndarray,
@@ -25,9 +28,7 @@ def grad_descent_with_validation(
     x_tr, y_tr = train_data[:, :2], train_data[:, 2:3]
     x_va, y_va = val_data[:, :2], val_data[:, 2:3]
     n = train_data.shape[0]
-    if batch_size is None:
-        batch_size = n
-
+    effective_batch_size = _resolve_batch_size(batch_size, n)
     rng = np.random.default_rng(seed)
 
     _, p_tr = mlp_forward(my_mlp, x_tr)
@@ -36,22 +37,16 @@ def grad_descent_with_validation(
     val_losses = [mse_loss(y_va, p_va)]
 
     for _ in range(epochs):
-        perm = rng.permutation(n)
-        for start in range(0, n, batch_size):
-            idx = perm[start : start + batch_size]
-            x_batch = x_tr[idx]
-            y_batch = y_tr[idx]
-            cache, pred = mlp_forward(my_mlp, x_batch)
-            grads = backprop(my_mlp, cache, y_batch, pred)
-            for key in my_mlp:
-                my_mlp[key] -= learning_rate * grads[f"d{key}"]
-
+        _run_epoch_batches(
+            my_mlp, x_tr, y_tr, n, effective_batch_size, learning_rate, rng,
+        )
         _, p_tr = mlp_forward(my_mlp, x_tr)
         _, p_va = mlp_forward(my_mlp, x_va)
         train_losses.append(mse_loss(y_tr, p_tr))
         val_losses.append(mse_loss(y_va, p_va))
 
     return train_losses, val_losses, my_mlp
+
 
 def hyperparameter_search(
     train_subset: np.ndarray,
