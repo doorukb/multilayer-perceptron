@@ -2,6 +2,7 @@ from __future__ import annotations
 import numpy as np
 from mlp.activations import sigmoid_forward
 
+# modify the input and weight matrix to include the bias term
 def modify_x_w(x: np.ndarray, w: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     x = np.atleast_2d(x)
     ones_column = np.ones((x.shape[0], 1))
@@ -9,7 +10,7 @@ def modify_x_w(x: np.ndarray, w: np.ndarray, b: np.ndarray) -> tuple[np.ndarray,
     w_new = np.vstack([w, np.atleast_2d(b)])
     return x_new, w_new
 
-
+# forward pass through the network
 def mlp_forward(my_mlp: dict[str, np.ndarray], x: np.ndarray) -> tuple[dict[str, np.ndarray], np.ndarray]:
     x = np.atleast_2d(x)
     cache = {"A0": x}

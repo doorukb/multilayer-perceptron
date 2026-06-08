@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+# test that the train and validation subsets have the correct shapes and no overlap
 def test_split_train_validation_shapes_and_no_overlap():
     from mlp.tuning import split_train_validation
 
@@ -19,7 +20,7 @@ def test_split_train_validation_shapes_and_no_overlap():
     b = np.sort(combined.view([("", combined.dtype)] * 3), axis=0)
     assert np.array_equal(a, b)
 
-
+# test that the split is reproducible with the same seed
 def test_split_is_reproducible_with_same_seed():
     from mlp.tuning import split_train_validation
 
@@ -41,16 +42,16 @@ def test_grad_descent_with_validation_loss_lengths():
     train_sub, val_sub = split_train_validation(train, val_fraction=0.25, seed=0)
     model = init_mlp([2, 5, 1])
 
-    iterations = 10
+    epochs = 10
     train_losses, val_losses, _ = grad_descent_with_validation(
-        train_sub, val_sub, model, iterations=iterations, learning_rate=0.05
+        train_sub, val_sub, model, epochs=epochs, learning_rate=0.05
     )
-    assert len(train_losses) == iterations + 1
-    assert len(val_losses) == iterations + 1
+    assert len(train_losses) == epochs + 1
+    assert len(val_losses) == epochs + 1
     # Validation loss never blows up (basic sanity).
     assert all(np.isfinite(v) for v in val_losses)
 
-
+# test that the hyperparameter search returns the correct results
 def test_hyperparameter_search_smoke():
     from mlp.data import sample_points
     from mlp.tuning import split_train_validation, hyperparameter_search
@@ -65,7 +66,7 @@ def test_hyperparameter_search_smoke():
         train_sub, val_sub,
         architectures=architectures,
         learning_rates=learning_rates,
-        iterations=20,
+        epochs=20,
     )
 
     assert len(results) == len(architectures) * len(learning_rates)

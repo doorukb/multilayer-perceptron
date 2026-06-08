@@ -1,8 +1,6 @@
 from __future__ import annotations
-import _path_setup  # noqa: F401
-
+import _path_setup
 import numpy as np
-
 from mlp.data import create_train_and_test
 from mlp.forward import mlp_forward
 from mlp.loss import mse_loss
@@ -17,7 +15,7 @@ ARCHITECTURES = [
     [2, 10, 10, 1],
 ]
 LEARNING_RATES = [0.01, 0.05, 0.1]
-ITERATIONS = 2000
+EPOCHS = 2000
 
 def main() -> None:
     np.random.seed(0)
@@ -36,7 +34,7 @@ def main() -> None:
         train_sub, val_sub,
         architectures=ARCHITECTURES,
         learning_rates=LEARNING_RATES,
-        iterations=ITERATIONS,
+        epochs=EPOCHS,
     )
 
     header = f"{'arch':<22} {'lr':<6} {'train':<10} {'val':<10} {'best_val':<10}"

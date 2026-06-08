@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
 
+# sample points from the unit circle
 def sample_points(n: int) -> np.ndarray:
     x = np.random.uniform(-1, 1, size=n)
     y = np.random.uniform(-1, 1, size=n)
@@ -8,6 +9,6 @@ def sample_points(n: int) -> np.ndarray:
     z = x ** 2 - y ** 2 + 1.2 + err
     return np.column_stack([x, y, z])
 
-
+# create train and test data
 def create_train_and_test(train_size: int = 100, test_size: int = 20) -> tuple[np.ndarray, np.ndarray]:
     return sample_points(train_size), sample_points(test_size)

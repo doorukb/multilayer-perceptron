@@ -2,11 +2,8 @@ from __future__ import annotations
 import numpy as np
 from mlp.loss import mse_loss_grad
 
+# compute the gradients of the loss function with respect to the weights of the network
 def backprop(my_mlp: dict[str, np.ndarray], cache: dict[str, np.ndarray], label: np.ndarray, pred: np.ndarray) -> dict[str, np.ndarray]:
-    """
-    Compute gradients for every weight matrix via backpropagation by traversing the network in reverse layer order, applying the chain rule at each step. The bias weights are folded into each weight matrix as an extra row, so augmentation is required at every layer boundary.
-    Takes the network paramters, cache, labels, and predictions as input, and outputs a dictionary/map of gradients that can be directly applied to the weights by the optimizer.
-    """
     total_layers = len(my_mlp)
     dcache: dict[str, np.ndarray] = {}
     # get the backward pass with dL/d(pred) from the loss function

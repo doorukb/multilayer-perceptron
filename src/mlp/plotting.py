@@ -2,9 +2,9 @@ from __future__ import annotations
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  
-
 from mlp.forward import mlp_forward
 
+# plot the 3d scatter of the dataset
 def plot_3d_scatter(points: np.ndarray) -> None:
     # 3d scatter of the dataset
     fig = plt.figure(figsize=(8, 6))
@@ -17,6 +17,7 @@ def plot_3d_scatter(points: np.ndarray) -> None:
     ax.set_title("Synthetic dataset")
     plt.show()
 
+# plot the train and test data
 def plot_train_and_test(train_data: np.ndarray, test_data: np.ndarray) -> None:
     # train (circles) vs test (triangles) 
     fig = plt.figure(figsize=(8, 6))
@@ -41,6 +42,7 @@ def plot_train_and_test(train_data: np.ndarray, test_data: np.ndarray) -> None:
     ax.legend()
     plt.show()
 
+# plot the data and the prediction surface
 def plot_data_and_pred(my_mlp, train_points: np.ndarray, test_points: np.ndarray) -> None:
     # rained model's prediction surface over [-1, 1]^2 
     grid_size = 30
@@ -76,6 +78,7 @@ def plot_data_and_pred(my_mlp, train_points: np.ndarray, test_points: np.ndarray
     ax.legend()
     plt.show()
 
+# plot the learning curves
 def plot_learning_curves(curves: dict[str, dict]) -> None:
     plt.figure(figsize=(9, 5))
     for i, (label, pair) in enumerate(curves.items()):
