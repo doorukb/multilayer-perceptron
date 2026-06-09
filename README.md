@@ -5,7 +5,7 @@
 - Matplotlib
 - pytest
 
-A multilayer perceptron trained with gradient descent, implemented entirely in NumPy with no machine learning frameworks. The project covers forward pass, backpropagation, MSE loss, and a gradient descent optimizer, all written from scratch. Hidden activations (sigmoid, tanh, ReLU) are swappable via the strategy pattern, each with gradient-checked backward passes. Analytical gradients are validated against numerical finite-difference checks. A hyperparameter search is included that follows strict train/validation/test discipline. The codebase is structured as a modular Python package with a full pytest suite.
+A multilayer perceptron trained with gradient descent, implemented entirely in NumPy with no machine learning frameworks. The project covers forward pass, backpropagation, MSE loss, L2 weight regularization (bias rows excluded from the penalty), and a gradient descent optimizer, all written from scratch. Hidden activations (sigmoid, tanh, ReLU) are swappable via the strategy pattern; backprop uses cached pre-activation values Z with a swappable activation_backward, not post-activation A. Analytical gradients are validated against numerical finite-difference checks. A hyperparameter search is included that follows strict train/validation/test discipline. The codebase is structured as a modular Python package with a full pytest suite.
 
 
 THE PROBLEM
@@ -68,6 +68,22 @@ Selected configuration (lowest validation MSE):
 
 The test MSE of 0.2536 is close to the theoretical noise floor, indicating the model learned the underlying surface well and did not overfit.
 
+
+Regularization sweep (experiment 06, 2000 epochs, lr=0.05, architecture [2, 10, 10, 1]):
+
+Same initialization and train/val split for each lambda; reported metrics are pure MSE (L2 affects gradients only; bias rows excluded from the penalty).
+
+    lambda     final_train   final_val     best_val
+    0              0.3815      0.4470       0.4470
+    1e-4           0.3816      0.4474       0.4474
+    1e-3           0.3825      0.4511       0.4511
+    1e-2           0.3905      0.4749       0.4677
+    1e-1           0.3918      0.4784       0.4713
+
+Sweet spot (lowest best val MSE): lambda=0 at 0.4470. As lambda increases, train MSE rises monotonically while val MSE worsens — there is no pronounced U-shape here. With ~80 train points and a modest network, the model does not overfit aggressively on this noisy regression surface, so L2 has little room to help. That shallow effect is itself the takeaway: regularization matters most when capacity exceeds what the data can support.
+
+Run locally: `cd experiments && python 06_regularization_sweep.py`
+
 INSTALLATION
 
 - Python 3.10 or later is required.
@@ -96,7 +112,7 @@ INSTALLATION
     train_data, test_data = create_train_and_test(train_size=100, test_size=20)
 
     model = init_mlp([2, 10, 1])   # input dim=2, 10 hidden units, output dim=1
-    losses, model = grad_descent(train_data, model, epochs=2000, learning_rate=0.1)
+    losses, model = grad_descent(train_data, model, epochs=2000, learning_rate=0.1, lmbda=1e-3)
 
     x_test = test_data[:, :2]
     y_test = test_data[:, 2:3]
@@ -109,7 +125,7 @@ INSTALLATION
 
     train_sub, val_sub = split_train_validation(train_data, val_fraction=0.2, seed=0)
     train_losses, val_losses, model = grad_descent_with_validation(
-        train_sub, val_sub, model, epochs=2000, learning_rate=0.1
+        train_sub, val_sub, model, epochs=2000, learning_rate=0.1, lmbda=1e-3
     )
 
 - Comparing activations on a deep network (sigmoid vs tanh vs ReLU):
@@ -123,7 +139,7 @@ INSTALLATION
 
 TESTING
 
-To run all the test from the project root, run :
+To run all the tests from the project root, run :
     pytest tests/ -v
 Feel free to add more tests you'd like.
 
@@ -135,7 +151,7 @@ test_activations
     Checks sigmoid_forward at x=0 (must return 0.5), at large positive/negative inputs, and verifies sigmoid_backward matches the numerical finite-difference derivative to within 1e-5. tanh_forward is checked at x=0 (must return 0.0) and at saturation; tanh_backward is verified the same way. relu_forward zeros negatives; relu_backward uses grad=1 if x>0 else 0 at the x=0 kink; finite-difference check excludes x=0.
 
 test_backward
-    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). Run for sigmoid, tanh, and ReLU hidden activations. For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates are compared to analytical gradients. Tolerance is 1e-4.
+    Verifies backprop against a numerical gradient check (regression test — re-run after init/forward/backward changes). Parametrized over sigmoid, tanh, and ReLU hidden activations and lmbda in {0, 0.1}. Hidden-layer derivatives use cached Z plus activation_backward, not post-activation A. For each entry in every weight matrix of a [2, 4, 1] Xavier-initialized network, epsilon=1e-5 central-difference estimates on total loss MSE + l2_penalty are compared to analytical gradients. Tolerance is 1e-4.
 
 test_loss
     MSE loss returns 0 when prediction equals label, returns the correct value on a known example (2/3 for unit-step errors), and the gradient matches the finite-difference gradient to within 1e-5.
@@ -150,16 +166,17 @@ test_data
     sample_points returns shape (n, 3), the residual Z - (X^2 - Y^2 + 1.2) has mean near 0 and std near 0.5 on a large sample, and create_train_and_test returns arrays of the requested sizes.
 
 test_optimizer
-    grad_descent trains for epochs with shuffled mini-batches and accepts swappable activation pairs. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Mini-batch convergence is checked as final full-dataset loss below initialization (not monotonic decrease every epoch — batch updates are noisy). ReLU training via grad_descent reduces loss.
+    grad_descent trains for epochs with shuffled mini-batches and accepts swappable activation pairs. Optional lmbda passes through to backprop; logged loss stays pure MSE. Full-batch GD and mini-batch GD share one loop: batch_size=None is equivalent to batch_size=len(data); batch_size=1 gives SGD. Same shuffle seed yields identical loss curves; batch_size=None matches explicit full-batch; different seeds diverge under SGD; full-batch training is invariant to shuffle order. Mini-batch convergence is checked as final full-dataset loss below initialization (not monotonic decrease every epoch — batch updates are noisy). ReLU training via grad_descent reduces loss.
 
 test_tuning
     split_train_validation produces the correct shapes and no row appears in both splits. The split is reproducible when the same seed is used. grad_descent_with_validation returns loss lists of length epochs+1 with all finite values. hyperparameter_search returns one result dict per configuration with the expected keys and correct curve lengths.
 
+test_regularization
+    l2_penalty computes (lambda/2) * sum(W^2) over connection weights only; bias rows are excluded. l2_penalty_grad applies lmbda*W on weight rows and zero on the bias row. Known-value, zero-lambda, and multi-layer sum tests. Gradient-diff test: backprop(lmbda>0) minus backprop(lmbda=0) equals lmbda*W[:-1,:] with zero bias-row delta.
+
 
 Roadmap
 
-- L2 regularisation
 - Momentum / Adam optimiser
 - Classification variant with cross-entropy loss and softmax output
 - Interactive visualisation widgets for exploring the training surface
-

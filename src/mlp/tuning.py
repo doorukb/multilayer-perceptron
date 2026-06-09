@@ -23,6 +23,7 @@ def grad_descent_with_validation(
     learning_rate: float, # the learning rate
     batch_size: int | None = None, # the batch size
     seed: int | None = None,
+    lmbda: float = 0.0,
 ) -> tuple[list[float], list[float], dict[str, np.ndarray]]:
     x_tr, y_tr = train_data[:, :2], train_data[:, 2:3]
     x_va, y_va = val_data[:, :2], val_data[:, 2:3]
@@ -36,7 +37,7 @@ def grad_descent_with_validation(
     val_losses = [mse_loss(y_va, p_va)]
 
     for _ in range(epochs):
-        _run_epoch_batches(my_mlp, x_tr, y_tr, n, effective_batch_size, learning_rate, rng, sigmoid_forward, sigmoid_backward)
+        _run_epoch_batches(my_mlp, x_tr, y_tr, n, effective_batch_size, learning_rate, rng, sigmoid_forward, sigmoid_backward, lmbda=lmbda)
         _, p_tr = mlp_forward(my_mlp, x_tr)
         _, p_va = mlp_forward(my_mlp, x_va)
         train_losses.append(mse_loss(y_tr, p_tr))

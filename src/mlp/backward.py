@@ -3,6 +3,7 @@ from collections.abc import Callable
 import numpy as np
 from mlp.activations import sigmoid_backward
 from mlp.loss import mse_loss_grad
+from mlp.regularization import l2_penalty_grad
 
 # compute the gradients of the loss function with respect to the weights of the network
 def backprop(
@@ -11,6 +12,7 @@ def backprop(
     label: np.ndarray, # the target labels
     pred: np.ndarray, # the predicted labels
     activation_backward: Callable[[np.ndarray], np.ndarray] = sigmoid_backward, # the backward pass of the activation function
+    lmbda: float = 0.0, # L2 regularization strength (0 disables penalty gradient)
 ) -> dict[str, np.ndarray]:
     total_layers = len(my_mlp)
     dcache: dict[str, np.ndarray] = {}
@@ -31,4 +33,7 @@ def backprop(
             Z = cache[f"Z{layer}"]
             act_grad = activation_backward(Z)
             delta = (delta @ W_without_bias.T) * act_grad
+    if lmbda != 0.0:
+        for key, dW_reg in l2_penalty_grad(my_mlp, lmbda).items():
+            dcache[key] += dW_reg
     return dcache

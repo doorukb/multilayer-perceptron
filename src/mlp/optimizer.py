@@ -22,6 +22,7 @@ def _run_epoch_batches(
     rng: np.random.Generator, 
     activation: Callable[[np.ndarray], np.ndarray], # the activation function
     activation_backward: Callable[[np.ndarray], np.ndarray], # the backward pass of the activation function
+    lmbda: float = 0.0, # L2 regularization strength (0 disables penalty gradient)
 ) -> None:
     perm = rng.permutation(n)
     for start in range(0, n, effective_batch_size):
@@ -29,7 +30,7 @@ def _run_epoch_batches(
         x_batch = inputs[idx]
         y_batch = targets[idx]
         cache, pred = mlp_forward(my_mlp, x_batch, activation=activation)
-        grads = backprop(my_mlp, cache, y_batch, pred, activation_backward=activation_backward)
+        grads = backprop(my_mlp, cache, y_batch, pred, activation_backward=activation_backward, lmbda=lmbda)
         for layer in my_mlp:
             my_mlp[layer] -= learning_rate * grads[f"d{layer}"]
 
@@ -43,6 +44,7 @@ def grad_descent(
     seed: int | None = None, # the random seed
     activation: Callable[[np.ndarray], np.ndarray] = sigmoid_forward, # the activation function
     activation_backward: Callable[[np.ndarray], np.ndarray] = sigmoid_backward, # the backward pass of the activation function
+    lmbda: float = 0.0, # L2 regularization strength (0 disables penalty gradient)
 ) -> tuple[list[float], dict[str, np.ndarray]]:
     inputs = data[:, :2]
     targets = data[:, 2:3]
@@ -54,7 +56,7 @@ def grad_descent(
     losses = [mse_loss(targets, predictions)]
 
     for _ in range(epochs):
-        _run_epoch_batches(my_mlp, inputs, targets, n, effective_batch_size, learning_rate, rng, activation, activation_backward)
+        _run_epoch_batches(my_mlp, inputs, targets, n, effective_batch_size, learning_rate, rng, activation, activation_backward, lmbda=lmbda)
         _, predictions = mlp_forward(my_mlp, inputs, activation=activation)
         losses.append(mse_loss(targets, predictions))
 
