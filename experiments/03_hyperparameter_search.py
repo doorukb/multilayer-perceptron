@@ -30,12 +30,7 @@ def main() -> None:
     print(f"Searching {len(ARCHITECTURES)} architectures x "
           f"{len(LEARNING_RATES)} learning rates = "
           f"{len(ARCHITECTURES) * len(LEARNING_RATES)} configurations...")
-    results = hyperparameter_search(
-        train_sub, val_sub,
-        architectures=ARCHITECTURES,
-        learning_rates=LEARNING_RATES,
-        epochs=EPOCHS,
-    )
+    results = hyperparameter_search(train_sub, val_sub, architectures=ARCHITECTURES, learning_rates=LEARNING_RATES, epochs=EPOCHS)
 
     header = f"{'arch':<22} {'lr':<6} {'train':<10} {'val':<10} {'best_val':<10}"
     print()
