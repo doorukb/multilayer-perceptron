@@ -19,7 +19,7 @@ Depth comparison (experiment 01, 2000 iterations, lr=0.05, architecture width=5)
     2-layer  [2, 5, 5, 1]  initial MSE: 4.3793  final MSE: 0.3926
 
 <p align="center">
-<img width="420" height="310" alt="depth_comparison" src="https://github.com/user-attachments/assets/951b7bec-49da-496b-b90a-556ee83de55c" /> <img width="4250" height="310" alt="learning_curve" src="https://github.com/user-attachments/assets/96b43f13-b540-4b37-b352-a5b84d4f8ac1" />
+<img width="420" height="310" alt="depth_comparison" src="https://github.com/user-attachments/assets/951b7bec-49da-496b-b90a-556ee83de55c" /> <img width="420" height="310" alt="learning_curve" src="https://github.com/user-attachments/assets/96b43f13-b540-4b37-b352-a5b84d4f8ac1" />
 </p>
 <p align="center">
 <img width="900" height="500" alt="05_batch_size_comparison" src="https://github.com/user-attachments/assets/266ff90b-974d-495d-a89f-aeed0d6088c5" /> <img width="900" height="500" alt="06_regularization_sweep" src="https://github.com/user-attachments/assets/c4910397-feeb-42b1-b80e-21c99613e720" />
