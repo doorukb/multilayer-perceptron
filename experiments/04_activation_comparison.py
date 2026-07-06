@@ -25,11 +25,7 @@ LEARNING_RATE = 0.05
 INIT_SEED = 42
 SHUFFLE_SEED = 0
 
-ACTIVATIONS = [
-    ("sigmoid", sigmoid_forward, sigmoid_backward),
-    ("tanh", tanh_forward, tanh_backward),
-    ("ReLU", relu_forward, relu_backward),
-]
+ACTIVATIONS = [("sigmoid", sigmoid_forward, sigmoid_backward), ("tanh", tanh_forward, tanh_backward), ("ReLU", relu_forward, relu_backward)]
 
 # print the mean sigmoid derivative sigma'(z) per hidden layer at initialization
 def _print_sigmoid_gradient_diagnostics(train_data: np.ndarray, model: dict[str, np.ndarray]) -> None:

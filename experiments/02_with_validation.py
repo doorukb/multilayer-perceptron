@@ -1,9 +1,7 @@
 from __future__ import annotations
 import _path_setup 
-
 import numpy as np
 import matplotlib.pyplot as plt
-
 from mlp.data import create_train_and_test
 from mlp.init import init_mlp
 from mlp.tuning import split_train_validation, grad_descent_with_validation
@@ -22,15 +20,11 @@ def main() -> None:
 
     np.random.seed(42)
     model_1 = init_mlp(ARCH_1)
-    train_1, val_1, _ = grad_descent_with_validation(
-        train_sub, val_sub, model_1, EPOCHS, LEARNING_RATE
-    )
+    train_1, val_1, _ = grad_descent_with_validation(train_sub, val_sub, model_1, EPOCHS, LEARNING_RATE)
 
     np.random.seed(42)
     model_2 = init_mlp(ARCH_2)
-    train_2, val_2, _ = grad_descent_with_validation(
-        train_sub, val_sub, model_2, EPOCHS, LEARNING_RATE
-    )
+    train_2, val_2, _ = grad_descent_with_validation(train_sub, val_sub, model_2, EPOCHS, LEARNING_RATE)
 
     print(f"1 layer  final  train: {train_1[-1]:.4f}   val: {val_1[-1]:.4f}")
     print(f"2 layer  final  train: {train_2[-1]:.4f}   val: {val_2[-1]:.4f}")
