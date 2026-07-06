@@ -1,5 +1,7 @@
 # Gradient Descent MLP
 
+[![CI](https://github.com/doorukb/gradient-descent-mlp/actions/workflows/ci.yml/badge.svg)](https://github.com/doorukb/gradient-descent-mlp/actions/workflows/ci.yml)
+
 - Python 3.10+
 - NumPy
 - Matplotlib
@@ -102,6 +104,10 @@ Same initialization and train/val split for each lambda; reported metrics are pu
 Sweet spot (lowest best val MSE): lambda=0 at 0.4470. As lambda increases, train MSE rises monotonically while val MSE worsens — there is no pronounced U-shape here. With ~80 train points and a modest network, the model does not overfit aggressively on this noisy regression surface, so L2 has little room to help. That shallow effect is itself the takeaway: regularization matters most when capacity exceeds what the data can support.
 
 Run locally: `cd experiments && python 06_regularization_sweep.py`
+
+## Roadmap
+
+This project serves as the from-scratch reference baseline for [pytorch-multilayer-perceptron](https://github.com/doorukb/Customer-Default-Binary-Classification), which re-implements the same architecture using PyTorch autograd and extends to a real tabular classification task with MLflow experiment tracking.
 
 ## Installation
 
