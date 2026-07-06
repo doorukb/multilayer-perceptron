@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Unit tests (47 checks, incl. numerical gradient validation)
+        run: python -m pytest tests/ -q
+      - name: Smoke-run the depth-comparison experiment
+        run: cd experiments && MPLBACKEND=Agg python 01_one_vs_two_layer.py
